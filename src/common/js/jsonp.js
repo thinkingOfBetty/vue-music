@@ -1,10 +1,9 @@
-import originJsonp from 'jsonp'
+import originJSONP from 'jsonp'
 
-export default function jsonp(url, data, option) {
-  url += (url.indexOf('?') < 0 ? '?' : '&') + param(data)
-
+export default function jsonp (url, data, option) {
+  url = (url.indexOf('?') < 0 ? '?' : '&') + param(data)
   return new Promise((resolve, reject) => {
-    originJsonp(url, option, (err, data) => {
+    originJSONP(url, option, (err, data) => {
       if (!err) {
         resolve(data)
       } else {
@@ -14,11 +13,13 @@ export default function jsonp(url, data, option) {
   })
 }
 
-export function param(data) {
+// 将data里面的数据拼接成 city='guangzho'&name='xiaoli'&sex='boy'这样子的
+function param (data) {
   let url = ''
-  for (var k in data) {
+  for (let k in data) {
     let value = data[k] !== undefined ? data[k] : ''
-    url += '&' + k + '=' + encodeURIComponent(value)
+    url += `&${k}=${encodeURIComponent(value)}`
   }
+  // 将最前面的&符号去除
   return url ? url.substring(1) : ''
 }
