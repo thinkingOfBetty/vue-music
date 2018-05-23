@@ -11,7 +11,7 @@
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
-
+import {addClass} from 'common/js/dom'
 export default {
   name: 'slider',
   props: {
@@ -28,8 +28,25 @@ export default {
       default: 4000
     }
   },
+  mounted () {
+    this._setSliderWidth()
+    this._initSlider()
+  },
   methods: {
-    _setSliderWidth (isResize) {
+    _setSliderWidth () {
+      let sliderWidth = this.$refs.slider.clientWidth
+      this.children = this.$refs.sliderGroup.children
+      let width = 0
+      for (let i = 0; i < this.children.length; i++) {
+        width += sliderWidth
+        let child = this.children[i]
+        addClass(child, 'slider-item')
+        child.style.width = sliderWidth + 'px'
+      }
+      if (this.loop === true) {
+        width += 2 * sliderWidth
+      }
+      this.$refs.sliderGroup.style.width = width + 'px'
     },
     _initSlider () {
       this.slider = new BScroll(this.$refs.slider, {
