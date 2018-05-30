@@ -5,6 +5,10 @@
       </slot>
     </div>
     <div class="dots">
+      <span class="dot"
+       v-for="(item,index) in dots"
+       :key="index"
+       :class="{active:currentPageIndex === index}"></span>
     </div>
   </div>
 </template>
@@ -14,6 +18,12 @@ import BScroll from 'better-scroll'
 import {addClass} from 'common/js/dom'
 export default {
   name: 'slider',
+  data () {
+    return {
+      dots: [],
+      currentPageIndex: 0
+    }
+  },
   props: {
     loop: {
       type: Boolean,
@@ -29,8 +39,21 @@ export default {
     }
   },
   mounted () {
-    this._setSliderWidth()
-    this._initSlider()
+    setTimeout(() => {
+      this._setSliderWidth()
+      this._initSlider()
+      this._initDots()
+      if (this.autoPlay) {
+        this._play()
+      }
+    }, 20 )
+    window.addEventListener('resize', () => {
+      if (!this.slider){
+        return
+      }
+      this._setSliderWidth(true)
+      this.slider.refresh()
+    })
   },
   methods: {
     _setSliderWidth () {
@@ -50,14 +73,42 @@ export default {
     },
     _initSlider () {
       this.slider = new BScroll(this.$refs.slider, {
+        click: true,
         scrollX: true,
         scrollY: false,
         momentum: false,
-        snap: true,
-        snapLoop: this.loop,
-        snapThreshold: 0.3,
-        snapSpeed: 400
+        // 新版本与老版本的snap配置不同
+        snap: {
+          loop: this.loop,
+          threshold: 0.3,
+          speed: 400
+        }
       })
+      this.slider.on('scrollEnd', () => {
+        let pageIndex = this.slider.getCurrentPage().pageX
+        if (this.loop) {
+          this.currentPageIndex = pageIndex - 1
+        }
+        this.currentPageIndex = pageIndex
+        if (this.autoPlay) {
+          clearTimeout(this.timer)
+          this._play()
+        }
+      })
+    },
+    _initDots () {
+      // 不能直接设置dots的长度，而是要通过new Array的方式
+      this.dots = new Array(this.children.length - 2)
+    },
+    _play () {
+      let pageIndex = this.currentPageIndex + 1
+      // 在新版本的配置中不用配if（。。。）
+      // if (this.loop) {
+      //   pageIndex += 1
+      // }
+      this.timer = setTimeout(() => {
+        this.slider.goToPage(pageIndex, 0, 400)
+      }, this.interval)
     }
   }
 }
@@ -68,6 +119,7 @@ export default {
 
   .slider
     min-height: 1px
+    position relative
     .slider-group
       position: relative
       overflow: hidden
