@@ -46,9 +46,9 @@ export default {
       if (this.autoPlay) {
         this._play()
       }
-    }, 20 )
+    }, 20)
     window.addEventListener('resize', () => {
-      if (!this.slider){
+      if (!this.slider) {
         return
       }
       this._setSliderWidth(true)

@@ -1,6 +1,6 @@
 <template>
   <div class="recommend" ref="recommend">
-    <!-- <scroll ref="scroll" class="recommend-content" > -->
+    <scroll  class="recommend-content" :data="discList">
       <div>
         <div  class="slider-wrapper" ref="sliderWrapper" v-if="recommends.length">
           <slider>
@@ -11,14 +11,29 @@
             </div>
           </slider>
         </div>
+        <div class="recommend-list">
+          <h1 class="list-title">热门歌单推荐</h1>
+          <ul>
+            <li @click="selectItem(item)" v-for="(item,index) in discList" :key="index" class="item">
+              <div class="icon">
+                <img width="60" height="60" :src="item.imgurl">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-    <!-- </scroll> -->
+    </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import Scroll from 'base/scroll/scroll'
 import Slider from 'base/slider/slider'
-import {getRecommend} from 'api/recommend'
+import {getRecommend, getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 // import axios from 'axios'
 export default {
@@ -30,8 +45,7 @@ export default {
   },
   created () {
     this._getRecommend()
-
-    // this._getDiscList()
+    this._getDiscList()
   },
   methods: {
     _getRecommend () {
@@ -40,25 +54,34 @@ export default {
           this.recommends = res.data.slider
         }
       })
+    },
+    _getDiscList () {
+      getDiscList().then((res) => {
+        if (res.code === ERR_OK) {
+          this.discList = res.data.list
+        }
+      })
     }
   },
   components: {
-    Slider
+    Slider,
+    Scroll
   }
 }
+
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
+@import "~common/stylus/variable"
 
-.recommend
+  .recommend
     position: fixed
     width: 100%
     top: 88px
     bottom: 0
     .recommend-content
-      height: 100%
-      overflow: hidden
+      height:100%
+      overflow hidden
       .slider-wrapper
         position: relative
         width: 100%
